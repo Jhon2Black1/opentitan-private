@@ -42,6 +42,7 @@ from docgen import html_data, mathjax
 from docgen.hjson_lexer import HjsonLexer
 from testplanner import class_defs, testplan_utils
 from wavegen import wavesvg
+import dashboard.gen_dashboard_entry as gen_dashboard_entry
 
 
 # mirrors Document but adds includes
@@ -363,6 +364,18 @@ class LowriscRenderer(mathjax.MathJaxRenderer):
                 return "<B>Errors parsing testplan prevents insertion.</B>"
             outbuf = io.StringIO()
             testplan_utils.gen_html_testplan_table(self.testplan, outbuf)
+            generated = outbuf.getvalue()
+            outbuf.close()
+            return generated
+        if token.type == "dashboard":
+            hjson_paths = []
+            # find all of the .prj.hjson files in the given path
+            hjson_paths.extend(sorted(Path(token.text).rglob('*.prj.hjson')))
+            outbuf = io.StringIO()
+            outbuf.write(html_data.dashboard_header)
+            for hjson_path in hjson_paths:
+                gen_dashboard_entry.gen_html(hjson_path, outbuf)
+            outbuf.write(html_data.dashboard_trailer)
             generated = outbuf.getvalue()
             outbuf.close()
             return generated
