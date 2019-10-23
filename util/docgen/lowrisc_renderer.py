@@ -35,6 +35,7 @@ from pygments.lexers import get_lexer_by_name as get_lexer
 from pygments.lexers import guess_lexer
 from pygments.styles import get_style_by_name as get_style
 
+import dashboard.gen_dashboard_entry as gen_dashboard_entry
 import reggen.gen_cfg_html as gen_cfg_html
 import reggen.gen_html as gen_html
 import reggen.validate as validate
@@ -42,7 +43,6 @@ from docgen import html_data, mathjax
 from docgen.hjson_lexer import HjsonLexer
 from testplanner import class_defs, testplan_utils
 from wavegen import wavesvg
-import dashboard.gen_dashboard_entry as gen_dashboard_entry
 
 
 # mirrors Document but adds includes
@@ -370,7 +370,10 @@ class LowriscRenderer(mathjax.MathJaxRenderer):
         if token.type == "dashboard":
             hjson_paths = []
             # find all of the .prj.hjson files in the given path
-            hjson_paths.extend(sorted(Path(token.text).rglob('*.prj.hjson')))
+            hjson_paths.extend(
+                sorted(
+                    Path(path.join(self.basedir,
+                                   token.text)).rglob('*.prj.hjson')))
             outbuf = io.StringIO()
             outbuf.write(html_data.dashboard_header)
             for hjson_path in hjson_paths:
