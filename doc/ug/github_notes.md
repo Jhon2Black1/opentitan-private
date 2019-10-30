@@ -354,3 +354,84 @@ At this point the conflicts have been cleared and the local repo can
 be used as expected.
 
 You may find it useful to change the default for the way git reports conflicts in a file. See [Take the pain out of git conflict resolution: use diff3](https://blog.nilbus.com/take-the-pain-out-of-git-conflict-resolution-use-diff3/)
+
+## Downloading pull request to local repo
+
+With the commands below, user can checkout pull request from lowRISC to
+local repo.
+```console
+$ git fetch upstream pull/{ID}/head:{BRANCH_NAME}
+$ # e.g. git fetch upstream pull/5/head:docgen_review
+$ git checkout {BRANCH_NAME}
+```
+
+### Applying the pull request to the local commit
+
+In some cases, you might need to apply a pull request on top of your local commits.
+For instance, if one user prepares a verification test case and finds a bug.
+Another user fixed it and created a pull request. The first user needs
+to test if the fix works on the new verification environment.
+
+In this case, it is recommanded to create a new branch on top of the local
+commit and `merge` or `cherry-pick` the pull request. Assume you have a branch
+name 'br_localfix' which has an update for the verification environment. If the
+other user created a pull request with ID #345 named 'pr_345', which has a fix for the
+design bug, then you can apply the pull request into new branch
+'br_localandremote' with the following two methods:
+* The `merge` method:
+  ```console
+  $ git fetch upstream pull/345/head:pr_345
+  $ git checkout -b br_localandremote br_localfix
+  $ git merge pr_345
+  ```
+* The `cherry-pick` method:
+  ```console
+  $ git fetch upstream pull/345/head:pr_345
+  $ git checkout pr_345
+  $ git log # then copy the commit ID you want to merge: b345232342ff
+  $ git checkout br_localandremote
+  $ git cherry-pick b345232342ff
+  ```
+Sometimes, this can result in conflicts if both commits have the same change.
+In that case, you should resolve the conflicts and continue the merge. Section
+[Dealing with conflicts after a rebase](#dealing-with-conflicts-after-a-rebase)
+has detailed guidance on how to solve conflicts.
+
+## Creating updates on top of a pending pull request
+
+In some cases, you might want to directly change other contributor's pull
+request. The process is quite complicated so please follow the instruction below
+step-by-step with caution:
+
+* Step 1: Checkout other's pull request branch
+  ```console
+  $ git fetch upstream pull/{ID}/head:{BRANCH_NAME}
+  $ git checkout {BRANCH_NAME}
+  ```
+* Step 2: Make necessary changes
+  ```console
+  $ git add <file1> <file2> ...
+  $ git commit -m “Add CFG examples to UART specification”
+  ```
+* Step 3: Create your github branch for the pull request
+  ```console
+  $ git push -u origin {BRANCH_NAME}:<remote_branch_name>
+  ```
+  You can use any branch name for the pull request.
+  If you want to the created branch name same as local branch name, this can
+  simply be:
+  ```console
+  $ git push -u origin HEAD
+  ```
+* Step 4: Create pull request into other's fork repo (Not your **origin** repo!)
+  To create a pull request in other's forked repo, you can follow the same method
+  as creating a pull request as section [Working in your local repo](#working-in-your-local-repo)
+  explained in details.
+  If the target branch is in lowRISC repo (**upstream**) already, you need to create a pull
+  request in lowRISC repo (**upstream**).
+
+These are all the steps needed. Once your pull request is reviewed and merged, you will
+be able to see that the commit is also visible in the original pull request.
+
+
+
