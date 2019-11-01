@@ -1,5 +1,7 @@
 # GitHub Notes
 
+Blabla
+
 The OpenTitan source tree is maintained on GitHub in a [monolithic repository](https://github.com/lowRISC/opentitan) called opentitan.
 
 This file provides some notes on using GitHub for developing in the
